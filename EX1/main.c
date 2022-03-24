@@ -38,6 +38,9 @@ int main(int ac, char *av[])
             }
         }
     }
+    lseek(fd, 0, SEEK_SET);
+    read(fd, &utmp, reclen);
+    print_begin(&utmp); 
 
     // Close the file
     close(fd);

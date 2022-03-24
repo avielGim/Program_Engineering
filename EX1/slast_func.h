@@ -11,4 +11,6 @@
 
 void read_utmp(struct utmp *ut);
 
+void print_begin(struct utmp *ut);
+
 #endif
