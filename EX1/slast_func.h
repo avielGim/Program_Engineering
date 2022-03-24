@@ -8,6 +8,7 @@
 #include <limits.h>      // LONG_MAX
 #include <unistd.h>      // open & read files 
 #include <fcntl.h>       // flag read only - O_RDONLY
+#include <string.h>
 
 void read_utmp(struct utmp *ut);
 

@@ -1,11 +1,9 @@
 #include "slast_func.h"
-#include <string.h>
+
 void read_utmp(struct utmp *ut){
     printf("%-8.8s ", ut->ut_user);
 
-    //char x[] = ut->ut_line;
     if(strcmp(ut->ut_line, "~") == 0){
-        //char x[] = "system boot  ";
         printf("system boot  ");
     }
     else{
@@ -21,7 +19,6 @@ void read_utmp(struct utmp *ut){
 
 void print_begin(struct utmp *ut){
     printf("\nwtmp begins ");
-
     
     time_t t = ut->ut_tv.tv_sec;
     struct tm *tm = localtime(&t);

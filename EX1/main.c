@@ -38,6 +38,8 @@ int main(int ac, char *av[])
             }
         }
     }
+
+    //Read the first login and print wtmp begins <date>
     lseek(fd, 0, SEEK_SET);
     read(fd, &utmp, reclen);
     print_begin(&utmp); 
