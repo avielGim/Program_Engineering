@@ -7,18 +7,28 @@ int main(int ac, char *av[])
     long int linelen; 
     
     //check if request for limit lines. else -> print all the file wtmp
-    if(ac > 1){
+    if(ac == 2){
         linelen = strtol(av[1], NULL, 10);
+        if(linelen <= 0){
+            if(linelen == 0){
+                linelen = LONG_MAX;
+            }
+            else{
+                printf("Error - do not insert negative number\n");
+                exit(1);        
+            }
+        }
     }
     else{
-        linelen = LONG_MAX;
+        printf("Error - insert only two arguments\n");
+        exit(1);
     }
 
     //Open the file
     int fd = open(WTMP_FILE, O_RDONLY);  
     if(fd == -1){
-        perror("Error open the file\n");
-        exit(1);
+        printf("Error - in open the file\n");
+        exit(2);
     }
 
     int num = 1;
