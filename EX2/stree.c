@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (nftw(argv[1], dirTree, 10, flags) == -1)
+    else if (nftw(argv[1], dirTree, 10, flags) == -1)
     {
         perror("nftw");
         exit(EXIT_FAILURE);
