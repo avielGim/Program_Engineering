@@ -12,7 +12,8 @@ void handle_sigint(int sig)
     printf("\nYou typed Control-C!\n");
 }
 
-int main() {
+int main()
+{
     /* ignore signal ^C */
     signal(SIGINT, handle_sigint);
 
@@ -21,7 +22,7 @@ int main() {
     char *token, *outfile;
     char command[1024], last_command[1024];
 
-    int i, fd,  retid, status;
+    int i, fd, status;
     int quit = 1, amper = 0, piping = 0,
         redir_err = 0, redir_out = 0, last_status = 0;
 
@@ -50,7 +51,8 @@ int main() {
         i = 0;
         token = strtok (command, " ");
 
-        if(token != NULL && !strcmp(token, "!!")) {
+        if(token != NULL && !strcmp(token, "!!"))
+        {
             memcpy(command, last_command, 1024);
             token = strtok (command, " ");
         }
@@ -60,7 +62,8 @@ int main() {
             argv[i] = token;
             token = strtok (NULL, " ");
             i++;
-            if (! piping && token && ! strcmp(token, "|")) {
+            if (! piping && token && ! strcmp(token, "|"))
+            {
                 piping = 1;
                 break;
             }
@@ -72,19 +75,22 @@ int main() {
             continue;
 
         /* exit */
-        if(! strcmp(argv[0], "quit")){
+        if(! strcmp(argv[0], "quit"))
+        {
             quit = 0;
             continue;
         }
 
         /* Does command line end with & */ 
-        if (! strcmp(argv[i - 1], "&")) {
+        if (! strcmp(argv[i - 1], "&"))
+        {
             amper = 1;
             argv[i - 1] = NULL;
         }
 
         /* change directory */
-        if(! strcmp(argv[0], "cd")){
+        if(! strcmp(argv[0], "cd"))
+        {
             if(argv[1] != NULL) chdir(argv[1]);
             else chdir("/home/aviel");
             continue;
@@ -98,9 +104,8 @@ int main() {
                 char temp_str[1000] = "$";
                 strcat(temp_str, argv[j]);
 
-                if(getenv(temp_str) != NULL){
+                if(getenv(temp_str) != NULL)
                     printf("%s ", getenv(temp_str));
-                }
                 else
                     printf("%s ", argv[j]);
             }
@@ -108,16 +113,18 @@ int main() {
             continue;
         }
 
-        if(i > 1){
+        if(i > 1)
+        {
             /* print */
-            if(! strcmp(argv[0], "echo")){
+            if(! strcmp(argv[0], "echo"))
+            {
                 /* print the last exit code */
-                if(! strcmp(argv[1], "$?")){
+                if(! strcmp(argv[1], "$?"))
                     printf("%d\n", last_status);
-                }
 
                 /* also print varible's enviroment */
-                else {
+                else
+                {
                     for (int j = 1; j < i; j++)
                     {
                         char *temp_str = argv[j];
@@ -132,12 +139,14 @@ int main() {
             }
         }
 
-        if(i > 2){
-            if(! strcmp(argv[1], "=")){
+        if(i > 2)
+        {
+            if(! strcmp(argv[1], "="))
+            {
                 /* change the prompt */
-                if(! strcmp(argv[0], "prompt")){
+                if(! strcmp(argv[0], "prompt"))
                     strcpy(prompt, argv[2]);
-                }
+
                 /* insert varible */
                 else {
                     setenv(argv[0], argv[2], 1);
@@ -148,7 +157,8 @@ int main() {
             /* redirect the stdout or stderr to file */
             redir_out = ! strcmp(argv[i - 2], ">"); // int out
             redir_err = ! strcmp(argv[i - 2], "2>"); // int err
-            if (redir_out || redir_err) {
+            if (redir_out || redir_err)
+            {
                 argv[i - 2] = NULL;
                 outfile = argv[i - 1];
             }
@@ -181,7 +191,8 @@ int main() {
         /* for commands not part of the shell command language */ 
         if (fork() == 0) { 
             /* redirection of stdout or stderr*/
-            if (redir_err || redir_out) {
+            if (redir_err || redir_out)
+            {
                 fd = creat(outfile, 0660); 
                 if(redir_out) close(STDOUT_FILENO);
                 else close(STDERR_FILENO); 
@@ -218,18 +229,15 @@ int main() {
                 }
                 exit(0);
             }
-
             /* execute the command */
-            else{
-                execvp(argv[0], argv);
-            }
-            quit = 0;
+            else execvp(argv[0], argv);
 
+            quit = 0;
         }
 
         /* parent continues here */
         
-        if (amper == 0) retid = wait(&status);
+        if (amper == 0) wait(&status);
 
         /* save the last exit code */
         last_status = WEXITSTATUS(status);
