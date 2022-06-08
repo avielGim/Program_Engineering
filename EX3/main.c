@@ -99,17 +99,29 @@ int main()
         /* get varibles enviroments */
         if (! strcmp(argv[0], "read"))
         {
-            for (int j = 1; j < i; j++)
+            if(i > 2)
             {
-                char temp_str[1000] = "$";
-                strcat(temp_str, argv[j]);
-
-                if(getenv(temp_str) != NULL)
-                    printf("%s ", getenv(temp_str));
-                else
-                    printf("%s ", argv[j]);
+                printf("too many arguments\n");
             }
-            printf("\n");
+            else
+            {
+                char read_command[1024];
+                fgets(read_command, 1024, stdin);
+                read_command[strlen(read_command) - 1] = '\0';
+
+                if(i == 1)
+                {
+                    char temp_read[6] = "$REPLY";
+                    setenv(temp_read, read_command, 1);
+                }
+                else if(i == 2) 
+                {
+                    char temp_str[1020] = "$";
+                    strcat(temp_str, argv[1]);
+                    
+                    setenv(temp_str, read_command, 1);
+                }
+            }
             continue;
         }
 
@@ -148,9 +160,9 @@ int main()
                     strcpy(prompt, argv[2]);
 
                 /* insert varible */
-                else {
+                else if(argv[0][0] == '$')
                     setenv(argv[0], argv[2], 1);
-                }
+
                 continue;
             }
 
@@ -189,7 +201,8 @@ int main()
         }
 
         /* for commands not part of the shell command language */ 
-        if (fork() == 0) { 
+        if (fork() == 0)
+        { 
             /* redirection of stdout or stderr*/
             if (redir_err || redir_out)
             {
