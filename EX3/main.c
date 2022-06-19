@@ -20,10 +20,10 @@ int main()
     /* initilize */
     char *argv[10];
     char *token, *outfile;
-    char command[1024], last_command[1024];
+    char command[1024], last_command[1024], temp_command[1024];
 
     int i, fd, status;
-    int quit = 1, amper = 0, piping = 0,
+    int amper = 0, piping = 0,
         redir_err = 0, redir_out = 0, last_status = 0;
 
     char prompt[1024];
@@ -33,7 +33,7 @@ int main()
     char ***args = (char ***)malloc(10 * sizeof(char **));
     int fildes[2];
 
-    while (quit)
+    while (1)
     {
         /* return start seeting */
         piping = 0;
@@ -41,12 +41,15 @@ int main()
         redir_err = 0;
 
         /* save the last command */
-        memcpy(last_command, command, 1024);
+        memcpy(last_command, temp_command, 1024);
 
         printf("%s: ", prompt);
         fgets(command, 1024, stdin);
         command[strlen(command) - 1] = '\0';
-
+        
+        /* copy the command */
+        memcpy(temp_command, command, 1024);
+        
         /* parse command line */
         i = 0;
         token = strtok (command, " ");
@@ -72,12 +75,15 @@ int main()
 
         /* Is command empty */
         if (argv[0] == NULL)
+        {
+            last_status= 148;
             continue;
+        }
 
         /* exit */
         if(! strcmp(argv[0], "quit"))
         {
-            quit = 0;
+            exit(0);
             continue;
         }
 
@@ -91,8 +97,16 @@ int main()
         /* change directory */
         if(! strcmp(argv[0], "cd"))
         {
-            if(argv[1] != NULL) chdir(argv[1]);
-            else chdir("/home/aviel");
+            if(argv[1] != NULL)
+            {
+                if(chdir(argv[1]) == -1)
+                {
+                    last_status= 1;
+                    continue;
+                }
+            } 
+            else chdir("/home/");
+            last_status = 0;
             continue;
         }
 
@@ -102,6 +116,7 @@ int main()
             if(i > 2)
             {
                 printf("too many arguments\n");
+                last_status = 2;
             }
             else
             {
@@ -121,6 +136,7 @@ int main()
                     
                     setenv(temp_str, read_command, 1);
                 }
+                last_status = 0;
             }
             continue;
         }
@@ -147,6 +163,7 @@ int main()
                     }
                     printf("\n");
                 }
+                last_status = 0;
                 continue;
             }
         }
@@ -161,8 +178,23 @@ int main()
 
                 /* insert varible */
                 else if(argv[0][0] == '$')
-                    setenv(argv[0], argv[2], 1);
-
+                {
+                    char var[1024];
+                    strcpy(var,argv[2]);
+                    for (int i=3; i<10; i++){
+                        if(argv[i]!= NULL){
+                            strcat(var, " ");
+                            strcat(var,argv[i]);
+                        }
+                    }
+                    setenv(argv[0], var, 1);
+                }
+                else
+                {
+                    last_status = 2;
+                    continue;    
+                }    
+                last_status = 0;
                 continue;
             }
 
@@ -243,9 +275,14 @@ int main()
                 exit(0);
             }
             /* execute the command */
-            else execvp(argv[0], argv);
-
-            quit = 0;
+            else
+            {
+                if (execvp(argv[0], argv) == -1)
+                {
+                    exit(127);
+                }
+            }
+            exit(0);
         }
 
         /* parent continues here */
